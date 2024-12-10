@@ -44,21 +44,21 @@ def create_and_plot_graphs(df, sample_id, property_mappings):
     def create_property_df(filtered_df, column_name, transform_func=None):
         if filtered_df.empty:
             return pd.DataFrame(columns=['sample_id', 'temperature', column_name])
-
+    
         lens = filtered_df['y'].map(len)
         temperatures = np.concatenate(filtered_df.apply(process_temperature, axis=1).values)
         values = np.concatenate(filtered_df['y'].map(transform_func).values if transform_func else filtered_df['y'].values)
-
-        # 온도에 따라 정렬
-        df = df.sort_values(by='temperature').reset_index(drop=True)
     
-        return df
-        
-        return pd.DataFrame({
+        # 온도에 따라 정렬
+        df = pd.DataFrame({
             'sample_id': filtered_df['sample_id'].repeat(lens),
             'temperature': temperatures,
             column_name: values
         })
+    
+        df = df.sort_values(by='temperature').reset_index(drop=True)  # 정렬
+    
+        return df
 
     # 데이터프레임 생성
     dataframes = {
