@@ -49,6 +49,11 @@ def create_and_plot_graphs(df, sample_id, property_mappings):
         temperatures = np.concatenate(filtered_df.apply(process_temperature, axis=1).values)
         values = np.concatenate(filtered_df['y'].map(transform_func).values if transform_func else filtered_df['y'].values)
 
+        # 온도에 따라 정렬
+        df = df.sort_values(by='temperature').reset_index(drop=True)
+    
+        return df
+        
         return pd.DataFrame({
             'sample_id': filtered_df['sample_id'].repeat(lens),
             'temperature': temperatures,
