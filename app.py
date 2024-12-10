@@ -122,8 +122,8 @@ def main():
                     # DOI는 텍스트로 표시
                     st.write(f"**DOI**: {doi}")
                 
-                    # URL은 클릭 가능한 링크로 표시
-                    st.markdown(f"**URL**: [Visit Here]({url})")
+                    # URL 데이터 자체에 하이퍼링크 연결
+                    st.markdown(f"**URL**: [{url}]({url})")
                 else:
                     st.write("**DOI**: Not Available")
                     st.write("**URL**: Not Available")
