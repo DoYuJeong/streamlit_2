@@ -85,6 +85,13 @@ def create_and_plot_graphs(df, sample_id, property_mappings):
 def main():
     st.title("Thermoelectric Property Dashboard")
 
+    # 간단한 CV 추가
+    st.markdown("""
+    **Created by: Doyujeong**  
+    **Email**: [doyujeong98@naver.com](mailto:doyujeong98@naver.com)  
+    **GitHub**: [DoYuJeong](https://github.com/DoYuJeong)
+    """)
+
     # 파일 경로 정의
     thermoelectric_file = 'starrydata_curves_1.csv'
     doi_file = 'starrydata_papers_1.csv'
