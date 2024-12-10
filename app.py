@@ -115,9 +115,18 @@ def main():
 
                 doi_info = sample_data[['DOI', 'URL']].drop_duplicates()
                 if not doi_info.empty:
-                    doi, url = doi_info.iloc[0]
-                    st.write(f"**DOI**: [Link]({doi})")
+                    # DOI와 URL 값을 가져옵니다.
+                    doi = doi_info['DOI'].iloc[0]
+                    url = doi_info['URL'].iloc[0]
+                
+                    # DOI는 텍스트로 표시
+                    st.write(f"**DOI**: {doi}")
+                
+                    # URL은 클릭 가능한 링크로 표시
                     st.markdown(f"**URL**: [Visit Here]({url})")
+                else:
+                    st.write("**DOI**: Not Available")
+                    st.write("**URL**: Not Available")
 
                 st.write("### Graphs")
                 create_and_plot_graphs(filtered_df, sample_id, property_mappings)
