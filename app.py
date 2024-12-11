@@ -140,8 +140,21 @@ def main():
 
                 # 데이터프레임 출력
                 st.write("### DataFrames for Each Property")
+                
+                # 키 이름에 대한 풀네임 매핑
+                property_fullnames = {
+                    'sigma': 'Electrical Conductivity (전기전도도)',
+                    'alpha': 'Seebeck Coefficient (제백계수)',
+                    'k': 'Thermal Conductivity (열전도도)',
+                    'ZT': 'Figure of Merit (ZT)'
+                }
+                
+                # 데이터프레임 출력 루프
                 for key, df in dataframes.items():
-                    st.write(f"#### {key.capitalize()} DataFrame")
+                    if key in property_fullnames:  # 키에 대한 풀네임이 있는 경우
+                        st.write(f"#### {property_fullnames[key]}")
+                    else:  # 매핑이 없는 경우 기본 키 사용
+                        st.write(f"#### {key.capitalize()} DataFrame")
                     st.dataframe(df)
         else:
             st.error("No samples with all properties found.")
