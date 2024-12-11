@@ -65,42 +65,43 @@ def create_and_plot_graphs(df, sample_id, property_mappings):
     # 개별 그래프 그리기
     figsize = (10, 8)
     fig, axs = plt.subplots(2, 2, figsize=figsize)
+    ax1, ax2, ax3, ax4 = axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1]
     
     # Sigma 그래프
     df_sigma = dataframes.get('sigma')
     if df_sigma is not None and not df_sigma.empty:
-        axs[0, 0].plot(df_sigma['temperature'], df_sigma['sigma'], marker='o', linestyle='-', color='m')
-        axs[0, 0].set_title(r'$\sigma$: Electrical Conductivity', fontsize=10)
-        axs[0, 0].set_xlabel('Temperature (K)', fontsize=9)
-        axs[0, 0].set_ylabel(r'$\sigma$ $[S/cm]$', fontsize=9)
-        axs[0, 0].grid(True)
+        ax1.plot(df_sigma['temperature'], df_sigma['sigma'], marker='o', linestyle='-', color='m')
+        ax1.set_title(r'$\sigma$: Electrical Conductivity', fontsize=10)
+        ax1.set_xlabel('Temperature (K)', fontsize=9)
+        ax1.set_ylabel(r'$\sigma$ $[S/cm]$', fontsize=9)
+        ax1.grid(True)
     
     # Alpha 그래프 (Y축 데이터에 1e6 곱하기)
     df_alpha = dataframes.get('alpha')
     if df_alpha is not None and not df_alpha.empty:
-        axs[0, 1].plot(df_alpha['temperature'], df_alpha['alpha'] * 1e6, marker='o', linestyle='-', color='g')
-        axs[0, 1].set_title(r'$\alpha$: Seebeck Coefficient', fontsize=10)
-        axs[0, 1].set_xlabel('Temperature (K)', fontsize=9)
-        axs[0, 1].set_ylabel(r'$\alpha$ $[\mu V/K]$', fontsize=9)
-        axs[0, 1].grid(True)
+        ax2.plot(df_alpha['temperature'], df_alpha['alpha'] * 1e6, marker='o', linestyle='-', color='g')
+        ax2.set_title(r'$\alpha$: Seebeck Coefficient', fontsize=10)
+        ax2.set_xlabel('Temperature (K)', fontsize=9)
+        ax2.set_ylabel(r'$\alpha$ $[\mu V/K]$', fontsize=9)
+        ax2.grid(True)
     
     # k 그래프
     df_k = dataframes.get('k')
     if df_k is not None and not df_k.empty:
-        axs[1, 0].plot(df_k['temperature'], df_k['k'], marker='o', linestyle='-', color='r')
-        axs[1, 0].set_title(r'$k$: Thermal Conductivity', fontsize=10)
-        axs[1, 0].set_xlabel('Temperature (K)', fontsize=9)
-        axs[1, 0].set_ylabel(r'$k$ $[W/(m·K)]$', fontsize=9)
-        axs[1, 0].grid(True)
+        ax3.plot(df_k['temperature'], df_k['k'], marker='o', linestyle='-', color='r')
+        ax3.set_title(r'$k$: Thermal Conductivity', fontsize=10)
+        ax3.set_xlabel('Temperature (K)', fontsize=9)
+        ax3.set_ylabel(r'$k$ $[W/(m·K)]$', fontsize=9)
+        ax3.grid(True)
     
     # ZT 그래프
     df_ZT = dataframes.get('ZT')
     if df_ZT is not None and not df_ZT.empty:
-        axs[1, 1].plot(df_ZT['temperature'], df_ZT['ZT'], marker='o', linestyle='-', color='b')
-        axs[1, 1].set_title(r'$ZT$: Figure of Merit', fontsize=10)
-        axs[1, 1].set_xlabel('Temperature (K)', fontsize=9)
-        axs[1, 1].set_ylabel(r'$ZT$', fontsize=9)
-        axs[1, 1].grid(True)
+        ax4.plot(df_ZT['temperature'], df_ZT['ZT'], marker='o', linestyle='-', color='b')
+        ax4.set_title(r'$ZT$: Figure of Merit', fontsize=10)
+        ax4.set_xlabel('Temperature (K)', fontsize=9)
+        ax4.set_ylabel(r'$ZT$', fontsize=9)
+        ax4.grid(True)
     
     plt.tight_layout()
     st.pyplot(fig)
