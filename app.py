@@ -46,12 +46,13 @@ def create_and_plot_graphs(df, sample_id, property_mappings):
             return pd.DataFrame(columns=['sample_id', 'temperature', column_name])
     
         lens = filtered_df['y'].map(len)
+        sample_ids = filtered_df['sample_id'].repeat(lens).values
         temperatures = np.concatenate(filtered_df.apply(process_temperature, axis=1).values)
         values = np.concatenate(filtered_df['y'].map(transform_func).values if transform_func else filtered_df['y'].values)
     
         # 온도에 따라 정렬
         df = pd.DataFrame({
-            'sample_id': filtered_df['sample_id'].repeat(lens),
+            'sample_id': temperatures,
             'temperature': temperatures,
             column_name: values
         })
@@ -60,31 +61,62 @@ def create_and_plot_graphs(df, sample_id, property_mappings):
     
         return df
 
+    # 데이터프레임 생성 함수
+    def create_property_dataframes(df, sample_id, property_mappings):
+        dataframes = {}
+        for column_name, (properties, transform_func) in property_mappings.items():
+            filtered_df = df[(df['prop_y'].isin(properties)) & (df['sample_id'] == sample_id)]
+            dataframes[column_name] = create_property_df(filtered_df, column_name, transform_func).sort_values(by='temperature')
+        return dataframes
+    
     # 데이터프레임 생성
-    dataframes = {
-        key: create_property_df(df[(df['prop_y'].isin(props)) & (df['sample_id'] == sample_id)], key, func)
-        for key, (props, func) in property_mappings.items()
-    }
-
-    # 그래프 생성
-    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-    keys = ['sigma', 'alpha', 'k', 'ZT']
-    titles = ['Sigma', 'Alpha', 'Thermal Conductivity (k)', 'ZT']
-    colors = ['m', 'g', 'r', 'b']
-
-    for ax, key, title, color in zip(axs.flatten(), keys, titles, colors):
-        df_key = dataframes.get(key)
-        if df_key is not None and not df_key.empty:
-            ax.plot(df_key['temperature'], df_key[key], marker='o', linestyle='-', color=color)
-            ax.set_title(title)
-            ax.set_xlabel('Temperature')
-            ax.set_ylabel(key)
-            ax.grid(True)
-
+    dataframes = create_property_dataframes(df, sample_id, property_mappings)
+    
+    df_sigma = dataframes['sigma']
+    df_alpha = dataframes['alpha']
+    df_k = dataframes['k']
+    df_ZT = dataframes['ZT']
+    
+    # 그래프 그리기
+    figsize = (10, 8)
+    fig, axs = plt.subplots(2, 2, figsize=figsize)
+    
+    ax1, ax2, ax3, ax4 = axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1]
+    
+    # Sigma 그래프
+    if not df_sigma.empty:
+        ax1.plot(df_sigma['temperature'], df_sigma['sigma'], marker='o', linestyle='-', color='m')
+        ax1.set_title(r'$\sigma$: Electrical Conductivity', fontsize=10)
+        ax1.set_xlabel('Temperature (K)', fontsize=9)
+        ax1.set_ylabel(r'$\sigma$ $[S/cm]$', fontsize=9)
+        ax1.grid(True)
+    
+    # Alpha 그래프
+    if not df_alpha.empty:
+        ax2.plot(df_alpha['temperature'], df_alpha['alpha'] * 1e6, marker='o', linestyle='-', color='g')
+        ax2.set_title(r'$\alpha$: Seebeck Coefficient', fontsize=10)
+        ax2.set_xlabel('Temperature (K)', fontsize=9)
+        ax2.set_ylabel(r'$\alpha$ $[\mu V/K]$', fontsize=9)
+        ax2.grid(True)
+    
+    # K 그래프
+    if not df_k.empty:
+        ax3.plot(df_k['temperature'], df_k['k'], marker='o', linestyle='-', color='r')
+        ax3.set_title(r'$k$: Thermal Conductivity', fontsize=10)
+        ax3.set_xlabel('Temperature (K)', fontsize=9)
+        ax3.set_ylabel(r'$k$ $[W/(m·K)]$', fontsize=9)
+        ax3.grid(True)
+    
+    # ZT 그래프
+    if not df_ZT.empty:
+        ax4.plot(df_ZT['temperature'], df_ZT['ZT'], marker='o', linestyle='-', color='b')
+        ax4.set_title(r'$ZT$: Figure of Merit', fontsize=10)
+        ax4.set_xlabel('Temperature (K)', fontsize=9)
+        ax4.set_ylabel(r'$ZT$', fontsize=9)
+        ax4.grid(True)
+    
     plt.tight_layout()
-    st.pyplot(fig)
-
-    return dataframes
+    st.pyplot(fig)  # Streamlit에서 그래프 표시
 
 # Streamlit 앱
 def main():
