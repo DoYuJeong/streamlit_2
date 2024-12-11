@@ -127,21 +127,22 @@ def main():
 
                 doi_info = sample_data[['DOI', 'URL']].drop_duplicates()
                 if not doi_info.empty:
-                    # DOI와 URL 값을 가져옵니다.
                     doi = doi_info['DOI'].iloc[0]
                     url = doi_info['URL'].iloc[0]
-                
-                    # DOI는 텍스트로 표시
                     st.write(f"**DOI**: {doi}")
-                
-                    # URL 데이터 자체에 하이퍼링크 연결
                     st.markdown(f"**URL**: [{url}]({url})")
                 else:
                     st.write("**DOI**: Not Available")
                     st.write("**URL**: Not Available")
 
                 st.write("### Graphs")
-                create_and_plot_graphs(filtered_df, sample_id, property_mappings)
+                dataframes = create_and_plot_graphs(filtered_df, sample_id, property_mappings)
+
+                # 데이터프레임 출력
+                st.write("### DataFrames for Each Property")
+                for key, df in dataframes.items():
+                    st.write(f"#### {key.capitalize()} DataFrame")
+                    st.dataframe(df)
         else:
             st.error("No samples with all properties found.")
     else:
@@ -149,3 +150,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
