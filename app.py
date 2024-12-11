@@ -143,10 +143,10 @@ def main():
                 
                 # 키 이름에 대한 풀네임 매핑
                 property_fullnames = {
-                    'sigma': 'Electrical Conductivity (전기전도도)',
-                    'alpha': 'Seebeck Coefficient (제백계수)',
-                    'k': 'Thermal Conductivity (열전도도)',
-                    'ZT': 'Figure of Merit (ZT)'
+                    'sigma': 'Electrical Conductivity',
+                    'alpha': 'Seebeck Coefficient',
+                    'k': 'Thermal Conductivity',
+                    'ZT': 'Figure of Merit'
                 }
                 
                 # 데이터프레임 출력 루프
