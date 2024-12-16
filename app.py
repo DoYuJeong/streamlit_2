@@ -4,33 +4,39 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-# ZT 데이터 병합 및 그래프 생성 함수
-def process_zt_data(df_ZT, df_Z, df_PF):
+# ZT 데이터 병합 함수 수정
+def process_zt_data(df_ZT, df_Z, df_PF, common_samples):
     all_zt_data = []
 
-    # ZT 데이터 그대로 사용
+    # ZT 데이터
     if df_ZT is not None:
+        df_ZT = df_ZT[df_ZT['sample_id'].isin(common_samples)]
         all_zt_data.append(df_ZT)
 
-    # Z 데이터를 ZT로 변환
+    # Z 데이터 변환
     if df_Z is not None:
+        df_Z = df_Z[df_Z['sample_id'].isin(common_samples)]
+        df_Z = df_Z[df_Z['temperature'] != 0]
         df_Z['tepvalue'] = df_Z['tepvalue'] * df_Z['temperature']
         all_zt_data.append(df_Z)
 
-    # PF 데이터를 ZT로 변환
+    # PF 데이터 변환
     if df_PF is not None:
+        df_PF = df_PF[df_PF['sample_id'].isin(common_samples)]
+        df_PF = df_PF[df_PF['temperature'] != 0]
         df_PF['tepvalue'] = df_PF['tepvalue'] / df_PF['temperature']
         all_zt_data.append(df_PF)
 
-    # 병합 후 반환
+    # 병합 및 정렬
     if all_zt_data:
         return pd.concat(all_zt_data, ignore_index=True).sort_values(by='temperature')
     return None
 
-# Sigma 데이터 병합 및 그래프 생성 함수
-def process_sigma_data(df_sigma, df_rho):
+# Sigma 병합 함수 수정
+def process_sigma_data(df_sigma, df_rho, common_samples):
     if df_rho is not None:
-        df_rho['tepvalue'] = 1 / df_rho['tepvalue']  # 역수로 변환
+        df_rho = df_rho[df_rho['sample_id'].isin(common_samples)]
+        df_rho['tepvalue'] = 1 / df_rho['tepvalue']
         df_rho['tepname'] = 'sigma'
         return pd.concat([df_sigma, df_rho], ignore_index=True).sort_values(by='temperature')
     return df_sigma
@@ -132,13 +138,10 @@ def main():
         else:
             st.warning(f"File {file_path} not found.")
 
-    # 열전 물성 공통 sample_id 필터링
-    required_keys = ['alpha', 'kappa', 'sigma', 'ZT']
+    # 공통 sample_id 필터링
+    required_keys = ['ZT', 'Z', 'PF', 'sigma', 'rho', 'alpha', 'kappa']
     common_samples = filter_common_samples_for_properties(dataframes, required_keys)
-
-    if not common_samples:
-        st.error("No common sample IDs found across all properties.")
-        return
+    st.write(f"Common Sample IDs: {common_samples}")
 
     # 샘플 ID 선택
     selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_samples))
