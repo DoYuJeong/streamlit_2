@@ -34,15 +34,14 @@ def process_sigma_data(df_sigma, df_rho):
         return pd.concat([df_sigma, df_rho], ignore_index=True).sort_values(by='temperature')
     return df_sigma
 
-# 공통 sample_id 필터링 함수 (물성별로)
-def filter_common_samples(dataframes, keys):
+# 공통 sample_id 필터링 함수
+def filter_common_samples_for_properties(dataframes, keys):
     """
     dataframes: 데이터프레임 딕셔너리
-    keys: 공통 샘플을 필터링할 데이터프레임 키 리스트
+    keys: 공통 sample_id를 확인할 데이터프레임 키 리스트
     """
     filtered_dataframes = {key: dataframes[key] for key in keys if key in dataframes and dataframes[key] is not None}
     sample_sets = [set(df['sample_id']) for df in filtered_dataframes.values()]
-    
     if sample_sets:
         return set.intersection(*sample_sets)
     return set()
@@ -55,7 +54,7 @@ def create_and_plot_graphs(dataframes, selected_sample_id):
 
     # Sigma 데이터 처리
     sigma_keys = ['sigma', 'rho']
-    common_sigma_samples = filter_common_samples(dataframes, sigma_keys)
+    common_sigma_samples = filter_common_samples_for_properties(dataframes, sigma_keys)
     if selected_sample_id in common_sigma_samples:
         df_sigma = process_sigma_data(dataframes.get('sigma'), dataframes.get('rho'))
         df_sigma = df_sigma[df_sigma['sample_id'] == selected_sample_id]
@@ -67,7 +66,9 @@ def create_and_plot_graphs(dataframes, selected_sample_id):
             ax1.grid(True)
 
     # Alpha 데이터 처리
-    if selected_sample_id in set(dataframes.get('alpha', pd.DataFrame())['sample_id']):
+    alpha_keys = ['alpha']
+    common_alpha_samples = filter_common_samples_for_properties(dataframes, alpha_keys)
+    if selected_sample_id in common_alpha_samples:
         df_alpha = dataframes.get('alpha')
         df_alpha = df_alpha[df_alpha['sample_id'] == selected_sample_id]
         if not df_alpha.empty:
@@ -78,7 +79,9 @@ def create_and_plot_graphs(dataframes, selected_sample_id):
             ax2.grid(True)
 
     # Kappa 데이터 처리
-    if selected_sample_id in set(dataframes.get('kappa', pd.DataFrame())['sample_id']):
+    kappa_keys = ['kappa']
+    common_kappa_samples = filter_common_samples_for_properties(dataframes, kappa_keys)
+    if selected_sample_id in common_kappa_samples:
         df_kappa = dataframes.get('kappa')
         df_kappa = df_kappa[df_kappa['sample_id'] == selected_sample_id]
         if not df_kappa.empty:
@@ -90,7 +93,7 @@ def create_and_plot_graphs(dataframes, selected_sample_id):
 
     # ZT 데이터 처리
     zt_keys = ['ZT', 'Z', 'PF']
-    common_zt_samples = filter_common_samples(dataframes, zt_keys)
+    common_zt_samples = filter_common_samples_for_properties(dataframes, zt_keys)
     if selected_sample_id in common_zt_samples:
         df_ZT = process_zt_data(dataframes.get('ZT'), dataframes.get('Z'), dataframes.get('PF'))
         df_ZT = df_ZT[df_ZT['sample_id'] == selected_sample_id]
@@ -104,7 +107,7 @@ def create_and_plot_graphs(dataframes, selected_sample_id):
     plt.tight_layout()
     st.pyplot(fig)
 
-# Main 함수에서 수정된 부분
+# Main 함수 수정
 def main():
     st.title("Thermoelectric Property Dashboard")
 
@@ -128,8 +131,9 @@ def main():
         else:
             st.warning(f"File {file_path} not found.")
 
-    # 공통 sample_id 필터링
-    common_samples = filter_common_samples(dataframes, file_paths.keys())
+    # 열전 물성 공통 sample_id 필터링
+    required_keys = ['alpha', 'kappa', 'sigma', 'ZT']
+    common_samples = filter_common_samples_for_properties(dataframes, required_keys)
 
     if not common_samples:
         st.error("No common sample IDs found across all properties.")
@@ -148,8 +152,6 @@ def main():
     st.write(f"### Graphs for Sample ID: {selected_sample_id}")
     create_and_plot_graphs(dataframes, selected_sample_id)
 
-if __name__ == "__main__":
-    main()
 if __name__ == "__main__":
     main()
 
