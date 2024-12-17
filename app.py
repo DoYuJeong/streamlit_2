@@ -78,8 +78,7 @@ def main():
     st.markdown("""
     **Created by: Doyujeong**  
     **Email**: [doyujeong98@naver.com](mailto:doyujeong98@naver.com)  
-    **GitHub**: <https://github.com/DoYuJeong>  
-    ---
+    **GitHub**: [DoYuJeong](https://github.com/DoYuJeong)
     """)
 
     st.markdown("""
