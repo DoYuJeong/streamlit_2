@@ -79,7 +79,6 @@ def main():
     **Created by: Doyujeong**  
     **Email**: [doyujeong98@naver.com](mailto:doyujeong98@naver.com)  
     **GitHub**: <https://github.com/DoYuJeong>
-    """
     ---
 
     ### 📊 **이 대시보드는 무엇인가요?**  
