@@ -72,13 +72,40 @@ def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
 
 # Streamlit 메인 함수
 def main():
-    st.title("Thermoelectric Property Viewer")
+    st.title("Thermoelectric Property Dashboard")
 
     # 간단한 CV 추가
     st.markdown("""
     **Created by: Doyujeong**  
     **Email**: [doyujeong98@naver.com](mailto:doyujeong98@naver.com)  
     **GitHub**: <https://github.com/DoYuJeong>
+    """
+    ---
+
+    ### 📊 **이 대시보드는 무엇인가요?**  
+    **열전 물성 대시보드**에 오신 것을 환영합니다!  
+    이 대시보드는 **열전재료**의 주요 물성을 시각화하는 도구입니다.  
+    아래의 물성을 온도에 따라 그래프로 확인할 수 있습니다:  
+    - **Sigma**: 전기전도도 (Electrical Conductivity)  
+    - **Alpha**: 제벡계수 (Seebeck Coefficient)  
+    - **Kappa**: 열전도도 (Thermal Conductivity)  
+    - **ZT**: 열전 성능 지수 (Figure of Merit)  
+
+    ---
+
+    ### 📝 **사용 방법**  
+    1. **왼쪽 사이드바에서 샘플 ID를 선택하세요.**  
+       - 샘플 ID는 특정 재료의 데이터 세트를 의미합니다.  
+    
+    2. **그래프 확인하기**  
+       - 선택한 샘플 ID에 대한 **온도별 열전 물성 그래프**를 확인할 수 있습니다.  
+    
+    3. **데이터 테이블 보기**  
+       - 그래프에 사용된 **원본 데이터**를 테이블 형식으로 제공합니다.  
+    
+    4. **연구 논문 정보 확인**  
+       - 해당 샘플 ID와 관련된 **DOI 및 URL** 링크를 통해 논문 정보를 확인할 수 있습니다.  
+
     """)
 
     # 데이터 로드
