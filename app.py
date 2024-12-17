@@ -417,16 +417,6 @@ def main():
     else:
         st.info("Please upload both data and DOI CSV files to proceed.")
 
-        
-        
-        if uploaded_file:
-            uploaded_df = load_and_process_data(uploaded_file)
-            if uploaded_df is not None:
-                sample_ids = uploaded_df['sample_id'].unique()
-                st.write("### Sample IDs in Uploaded Data")
-                selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(sample_ids))
-                dataframes = {'uploaded': uploaded_df}
-                create_and_plot_graphs(dataframes, selected_sample_id)
 
 
 if __name__ == "__main__":
