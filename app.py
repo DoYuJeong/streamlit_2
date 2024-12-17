@@ -74,6 +74,13 @@ def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
 def main():
     st.title("Thermoelectric Property Viewer")
 
+    # 간단한 CV 추가
+    st.markdown("""
+    **Created by: Doyujeong**  
+    **Email**: [doyujeong98@naver.com](mailto:doyujeong98@naver.com)  
+    **GitHub**: [DoYuJeong](https://github.com/DoYuJeong)
+    """)
+
     # 데이터 로드
     file_paths = {
         'sigma': 'df_combined_sigma.csv',
