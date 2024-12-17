@@ -74,6 +74,13 @@ def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
 def main():
     st.title("Thermoelectric Property Viewer")
 
+    # 간단한 CV 추가
+    st.markdown("""
+    **Created by: Doyujeong**  
+    **Email**: [doyujeong98@naver.com](mailto:doyujeong98@naver.com)  
+    **GitHub**: <https://github.com/DoYuJeong>
+    """)
+
     # 데이터 로드
     file_paths = {
         'sigma': 'df_combined_sigma.csv',
@@ -81,7 +88,8 @@ def main():
         'kappa': 'df_kappa0.csv',
         'ZT': 'df_combined_ZT.csv'
     }
-
+    doi_file = 'starrydata_papers_1.csv'
+    
     # 데이터프레임 딕셔너리 구성
     dataframes = {}
     for key, path in file_paths.items():
@@ -89,6 +97,14 @@ def main():
             dataframes[key] = pd.read_csv(path)
         except FileNotFoundError:
             st.warning(f"File {path} not found.")
+
+    # DOI 데이터 불러오기
+    try:
+        doi_df = pd.read_csv(doi_file, usecols=['SID', 'DOI', 'URL'])
+    except FileNotFoundError:
+        st.error(f"DOI file {doi_file} not found.")
+        return
+    
     
     # 공통 sample_id 추출
     common_sample_ids = get_common_sample_ids(dataframes)
@@ -102,6 +118,17 @@ def main():
 
     # 데이터프레임 출력
     st.write(f"### Selected Sample ID: {selected_sample_id}")
+
+    # 선택된 sample_id에 대한 DOI 정보
+    doi_info = doi_df[doi_df['SID'] == selected_sample_id]
+    if not doi_info.empty:
+        doi = doi_info['DOI'].iloc[0]
+        url = doi_info['URL'].iloc[0]
+        st.write(f"**DOI**: {doi}")
+        st.markdown(f"**URL**: [{url}]({url})")
+    else:
+        st.write("**DOI**: Not Available")
+        st.write("**URL**: Not Available")
 
     # 그래프 출력
     st.write("### Graphs for Selected Sample ID")
