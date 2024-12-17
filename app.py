@@ -245,8 +245,6 @@ def plot_TEP(df, sample_id):
 
 
 
-
-
 # Streamlit 메인 함수
 def main():
     st.title("Thermoelectric Property Dashboard")
@@ -396,8 +394,11 @@ def main():
                 # 선택한 샘플 ID 데이터 필터링
                 sample_data = filtered_df[filtered_df['sample_id'] == sample_id]
                 st.write(f"### Data Table for Sample ID: {sample_id}")
-                st.dataframe(sample_data)
 
+                # 그래프 그리기
+                st.write("### Property Graphs")
+                plot_TEP(filtered_df, sample_id)
+                
                 # DOI 정보 출력
                 doi_info = sample_data[['DOI', 'URL']].drop_duplicates()
                 if not doi_info.empty:
@@ -412,10 +413,6 @@ def main():
                 else:
                     st.write("**DOI**: Not Available")
                     st.write("**URL**: Not Available")
-
-                # 그래프 그리기
-                st.write("### Property Graphs")
-                plot_TEP(filtered_df, sample_id)
 
                 # 데이터프레임 출력
                 st.write("### DataFrames for Each Property")
