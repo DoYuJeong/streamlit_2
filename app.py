@@ -426,7 +426,7 @@ def main():
                 }
                 
                 # 데이터프레임 출력 루프
-                for key, df in dataframes.items():
+                for key, filtered_df in dataframes.items():
                     if key in property_fullnames:  # 키에 대한 풀네임이 있는 경우
                         st.write(f"#### {property_fullnames[key]}")
                     else:  # 매핑이 없는 경우 기본 키 사용
