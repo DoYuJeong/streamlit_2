@@ -166,10 +166,12 @@ def main():
         common_sample_ids = get_common_sample_ids(dataframes)
 
         if common_sample_ids:
+            st.write("### 공통된 Sample IDs")
+            st.write(sorted(common_sample_ids))
             selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
             create_and_plot_graphs_filtered(dataframes, selected_sample_id)
         else:
-            st.error("No common sample IDs found.")
+            st.error("No common sample IDs with all properties found.")
 
     elif option == "파일 업로드":
         uploaded_file = st.sidebar.file_uploader("Thermoelectric Data File", type="csv")
@@ -177,6 +179,8 @@ def main():
             uploaded_df = load_and_process_data(uploaded_file)
             if uploaded_df is not None:
                 sample_ids = uploaded_df['sample_id'].unique()
+                st.write("### 공통된 Sample IDs")
+                st.write(sorted(sample_ids))
                 selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(sample_ids))
                 create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id)
 
