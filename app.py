@@ -436,10 +436,6 @@ def main():
             st.error("No samples with all properties found.")
     else:
         st.info("Please upload both data and DOI CSV files to proceed.")
-    else:
-        st.info("Please upload both data and DOI CSV files to proceed.")
-
-
 
 if __name__ == "__main__":
     main()
