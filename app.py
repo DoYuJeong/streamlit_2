@@ -416,6 +416,27 @@ def main():
                 # 그래프 그리기
                 st.write("### Property Graphs")
                 plot_TEP(filtered_df, sample_id)
+
+                # 데이터프레임 출력
+                st.write("### DataFrames for Each Property")
+                
+                # 키 이름에 대한 풀네임 매핑
+                property_fullnames = {
+                    'sigma': 'Electrical Conductivity',
+                    'alpha': 'Seebeck Coefficient',
+                    'k': 'Thermal Conductivity',
+                    'ZT': 'Figure of Merit'
+                }
+                
+                # 데이터프레임 출력 루프
+                for key, df in dataframes.items():
+                    if key in property_fullnames:  # 키에 대한 풀네임이 있는 경우
+                        st.write(f"#### {property_fullnames[key]}")
+                    else:  # 매핑이 없는 경우 기본 키 사용
+                        st.write(f"#### {key.capitalize()} DataFrame")
+                    st.dataframe(df)
+        else:
+            st.error("No samples with all properties found.")
     else:
         st.info("Please upload both data and DOI CSV files to proceed.")
 
