@@ -70,10 +70,51 @@ def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
     plt.tight_layout()
     st.pyplot(fig)
 
+# 업로드 데이터 그래프 생성 함수
+def create_and_plot_graphs(dataframes, selected_sample_id):
+    def process_temperature(row):
+        return [1 / t if t != 0 else np.nan for t in row['x']] if row['prop_x'] == 'Inverse temperature' else row['x']
+
+    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+    titles = ["Electrical Conductivity", "Seebeck Coefficient", "Thermal Conductivity", "ZT"]
+    units = [r"$\sigma$ [S/cm]", r"$\alpha$ [$\mu V/K$]", r"$k$ [W/(m·K)]", r"ZT"]
+    colors = ['m', 'g', 'r', 'b']
+    keys = ["sigma", "alpha", "kappa", "ZT"]
+
+    for ax, key, title, unit, color in zip(axs.flatten(), keys, titles, units, colors):
+        df = dataframes.get(key)
+        if df is not None and not df.empty:
+            filtered_df = df[df['sample_id'] == selected_sample_id]
+            lens = filtered_df['y'].map(len)
+            temperatures = np.concatenate(filtered_df.apply(process_temperature, axis=1).values)
+            values = np.concatenate(filtered_df['y'].values)
+
+            ax.plot(temperatures, values, marker='o', linestyle='-', color=color)
+            ax.set_title(title)
+            ax.set_xlabel("Temperature (K)")
+            ax.set_ylabel(unit)
+            ax.grid(True)
+
+    plt.tight_layout()
+    st.pyplot(fig)
+
+# 업로드 데이터 처리 함수
+def load_and_process_data(uploaded_file):
+    try:
+        df = pd.read_csv(uploaded_file, usecols=['prop_x', 'prop_y', 'x', 'y', 'sample_id'])
+        df['x'] = df['x'].apply(ast.literal_eval)
+        df['y'] = df['y'].apply(ast.literal_eval)
+        return df
+    except Exception as e:
+        st.error(f"Error processing uploaded file: {e}")
+        return None
+
+
 # Streamlit 메인 함수
 def main():
     st.title("Thermoelectric Property Dashboard")
-
+    option = st.sidebar.radio("데이터 처리 방식", ["기본 데이터 사용", "파일 업로드"])
+    
     # 간단한 CV 추가
     st.markdown("""
     **Created by: Doyujeong**  
@@ -106,79 +147,91 @@ def main():
        - 해당 샘플 ID와 관련된 **DOI 및 URL** 링크를 통해 논문 정보를 확인할 수 있습니다.  
     """)
 
-    # 데이터 로드
-    file_paths = {
-        'sigma': 'df_combined_sigma.csv',
-        'alpha': 'df_alpha0.csv',
-        'kappa': 'df_kappa0.csv',
-        'ZT': 'df_combined_ZT.csv'
-    }
-    doi_file = 'starrydata_papers_1.csv'
+    if option == "기본 데이터 사용":
+        # 데이터 로드
+        file_paths = {
+            'sigma': 'df_combined_sigma.csv',
+            'alpha': 'df_alpha0.csv',
+            'kappa': 'df_kappa0.csv',
+            'ZT': 'df_combined_ZT.csv'
+        }
+        doi_file = 'starrydata_papers_1.csv'
+        
+        # 데이터프레임 딕셔너리 구성
+        dataframes = {}
+        for key, path in file_paths.items():
+            try:
+                dataframes[key] = pd.read_csv(path)
+            except FileNotFoundError:
+                st.warning(f"File {path} not found.")
     
-    # 데이터프레임 딕셔너리 구성
-    dataframes = {}
-    for key, path in file_paths.items():
+        # DOI 데이터 불러오기
         try:
-            dataframes[key] = pd.read_csv(path)
+            doi_df = pd.read_csv(doi_file, usecols=['SID', 'DOI', 'URL'])
         except FileNotFoundError:
-            st.warning(f"File {path} not found.")
-
-    # DOI 데이터 불러오기
-    try:
-        doi_df = pd.read_csv(doi_file, usecols=['SID', 'DOI', 'URL'])
-    except FileNotFoundError:
-        st.error(f"DOI file {doi_file} not found.")
-        return
+            st.error(f"DOI file {doi_file} not found.")
+            return
+        
+        
+        # 공통 sample_id 추출
+        common_sample_ids = get_common_sample_ids(dataframes)
     
+        if not common_sample_ids:
+            st.error("No common sample IDs found across all datasets.")
+            return
     
-    # 공통 sample_id 추출
-    common_sample_ids = get_common_sample_ids(dataframes)
+        # 사용자 선택: sample_id
+        selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
+    
+        # 데이터프레임 출력
+        st.write(f"### Selected Sample ID: {selected_sample_id}")
+    
+        # 선택된 sample_id에 대한 DOI 정보
+        doi_info = doi_df[doi_df['SID'] == selected_sample_id]
+        if not doi_info.empty:
+            doi = doi_info['DOI'].iloc[0]
+            url = doi_info['URL'].iloc[0]
+            st.write(f"**DOI**: {doi}")
+            st.markdown(f"**URL**: [{url}]({url})")
+        else:
+            st.write("**DOI**: Not Available")
+            st.write("**URL**: Not Available")
+    
+        # 그래프 출력
+        st.write("### Graphs for Selected Sample ID")
+        create_and_plot_graphs_filtered(dataframes, selected_sample_id)
+    
+        # 정확한 데이터프레임 출력
+        if 'sigma' in dataframes and not dataframes['sigma'].empty:
+            df_sigma_filtered = dataframes['sigma'][dataframes['sigma']['sample_id'] == selected_sample_id]
+            st.write("#### Electrical conductivity DataFrame")
+            st.dataframe(df_sigma_filtered)
+    
+        if 'alpha' in dataframes and not dataframes['alpha'].empty:
+            df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
+            st.write("#### Seebeck coefficient DataFrame")
+            st.dataframe(df_alpha_filtered)
+    
+        if 'kappa' in dataframes and not dataframes['kappa'].empty:
+            df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
+            st.write("#### Thermal conductivity DataFrame")
+            st.dataframe(df_kappa_filtered)
+    
+        if 'ZT' in dataframes and not dataframes['ZT'].empty:
+            df_ZT_filtered = dataframes['ZT'][dataframes['ZT']['sample_id'] == selected_sample_id]
+            st.write("#### ZT DataFrame")
+            st.dataframe(df_ZT_filtered)
 
-    if not common_sample_ids:
-        st.error("No common sample IDs found across all datasets.")
-        return
-
-    # 사용자 선택: sample_id
-    selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
-
-    # 데이터프레임 출력
-    st.write(f"### Selected Sample ID: {selected_sample_id}")
-
-    # 선택된 sample_id에 대한 DOI 정보
-    doi_info = doi_df[doi_df['SID'] == selected_sample_id]
-    if not doi_info.empty:
-        doi = doi_info['DOI'].iloc[0]
-        url = doi_info['URL'].iloc[0]
-        st.write(f"**DOI**: {doi}")
-        st.markdown(f"**URL**: [{url}]({url})")
-    else:
-        st.write("**DOI**: Not Available")
-        st.write("**URL**: Not Available")
-
-    # 그래프 출력
-    st.write("### Graphs for Selected Sample ID")
-    create_and_plot_graphs_filtered(dataframes, selected_sample_id)
-
-    # 정확한 데이터프레임 출력
-    if 'sigma' in dataframes and not dataframes['sigma'].empty:
-        df_sigma_filtered = dataframes['sigma'][dataframes['sigma']['sample_id'] == selected_sample_id]
-        st.write("#### Electrical conductivity DataFrame")
-        st.dataframe(df_sigma_filtered)
-
-    if 'alpha' in dataframes and not dataframes['alpha'].empty:
-        df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
-        st.write("#### Seebeck coefficient DataFrame")
-        st.dataframe(df_alpha_filtered)
-
-    if 'kappa' in dataframes and not dataframes['kappa'].empty:
-        df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
-        st.write("#### Thermal conductivity DataFrame")
-        st.dataframe(df_kappa_filtered)
-
-    if 'ZT' in dataframes and not dataframes['ZT'].empty:
-        df_ZT_filtered = dataframes['ZT'][dataframes['ZT']['sample_id'] == selected_sample_id]
-        st.write("#### ZT DataFrame")
-        st.dataframe(df_ZT_filtered)
+    elif option == "파일 업로드":
+        uploaded_file = st.sidebar.file_uploader("Thermoelectric Data File", type="csv")
+        if uploaded_file:
+            uploaded_df = load_and_process_data(uploaded_file)
+            if uploaded_df is not None:
+                sample_ids = uploaded_df['sample_id'].unique()
+                st.write("### Sample IDs in Uploaded Data")
+                selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(sample_ids))
+                dataframes = {'uploaded': uploaded_df}
+                create_and_plot_graphs(dataframes, selected_sample_id)
 
 
 if __name__ == "__main__":
