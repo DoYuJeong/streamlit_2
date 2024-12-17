@@ -405,10 +405,10 @@ def main():
                     url = doi_info['URL'].iloc[0]
 
                     # DOI를 링크로 표시
-                    st.write(f"**DOI**: [Link]({doi})")
+                    st.write(f"**DOI**: {doi}")
 
                     # URL을 클릭 가능한 링크로 표시
-                    st.markdown(f"**URL**: [Visit Here]({url})")
+                    st.markdown(f"**URL**: [{url}]({url})")
                 else:
                     st.write("**DOI**: Not Available")
                     st.write("**URL**: Not Available")
