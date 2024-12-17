@@ -243,6 +243,7 @@ def plot_TEP(df, sample_id):
     plt.tight_layout()
     st.pyplot(fig)  # Streamlit에서 그래프 표시
 
+    return dataframes
 
 
 # Streamlit 메인 함수
@@ -397,7 +398,7 @@ def main():
 
                 # 그래프 그리기
                 st.write("### Property Graphs")
-                plot_TEP(filtered_df, sample_id)
+                dataframes = plot_TEP(filtered_df, sample_id)  # 데이터프레임 반환
                 
                 # DOI 정보 출력
                 doi_info = sample_data[['DOI', 'URL']].drop_duplicates()
@@ -426,7 +427,7 @@ def main():
                 }
                 
                 # 데이터프레임 출력 루프
-                for key, filtered_df in dataframes.items():
+                for key, df in dataframes.items():
                     if key in property_fullnames:  # 키에 대한 풀네임이 있는 경우
                         st.write(f"#### {property_fullnames[key]}")
                     else:  # 매핑이 없는 경우 기본 키 사용
