@@ -391,26 +391,13 @@ def main():
             sample_id = st.sidebar.selectbox("Select Sample ID (with all properties):", sorted(common_samples))
 
             if sample_id:
-                # 선택한 샘플 ID에 대한 데이터 전처리
-                st.write(f"### Data Table for Sample ID: {sample_id}")
+               # 선택한 샘플 ID 데이터 필터링
                 sample_data = filtered_df[filtered_df['sample_id'] == sample_id]
-                st.dataframe(sample_data)
+                st.write(f"### Data Table for Sample ID: {sample_id}")
 
-                # 데이터프레임 생성 (업로드된 데이터)
-                dataframes = {}
-                for key, (props, transform_func) in property_mappings.items():
-                    filtered_property_df = sample_data[sample_data['prop_y'].isin(props)]
-                    dataframes[key] = filtered_property_df.groupby(['sample_id']).apply(
-                        lambda x: pd.DataFrame({
-                            'temperature': np.concatenate(x.apply(lambda row: [1/t if row['prop_x'] == 'Inverse temperature' else row['x'] for t in row['x']], axis=1)),
-                            'tepvalue': np.concatenate(x['y'])
-                        })
-                    ).reset_index(drop=True)
-                
-                
                 # 그래프 그리기
                 st.write("### Property Graphs")
-                create_and_plot_graphs_filtered(dataframes, sample_id)
+                plot_TEP(filtered_df, sample_id)
                 
                 # DOI 정보 출력
                 doi_info = sample_data[['DOI', 'URL']].drop_duplicates()
@@ -447,6 +434,8 @@ def main():
                     st.dataframe(df)
         else:
             st.error("No samples with all properties found.")
+    else:
+        st.info("Please upload both data and DOI CSV files to proceed.")
     else:
         st.info("Please upload both data and DOI CSV files to proceed.")
 
