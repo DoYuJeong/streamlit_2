@@ -74,13 +74,6 @@ def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
 def main():
     st.title("Thermoelectric Property Viewer")
 
-    # 간단한 CV 추가
-    st.markdown("""
-    **Created by: Doyujeong**  
-    **Email**: [doyujeong98@naver.com](mailto:doyujeong98@naver.com)  
-    **GitHub**: [DoYuJeong](https://github.com/DoYuJeong)
-    """)
-
     # 데이터 로드
     file_paths = {
         'sigma': 'df_combined_sigma.csv',
@@ -107,15 +100,31 @@ def main():
     # 사용자 선택: sample_id
     selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
 
-    # 선택된 sample_id에 대한 데이터프레임 출력
+    # 데이터프레임 출력
     st.write(f"### Selected Sample ID: {selected_sample_id}")
-    for name, df in dataframes.items():
-        filtered_df = df[df['sample_id'] == selected_sample_id]
-        if not filtered_df.empty:
-            st.write(f"#### {name.capitalize()} DataFrame")
-            st.dataframe(filtered_df)
 
-    # 선택된 sample_id에 대한 그래프 출력
+    # 정확한 데이터프레임 출력
+    if 'sigma' in dataframes and not dataframes['sigma'].empty:
+        df_sigma_filtered = dataframes['sigma'][dataframes['sigma']['sample_id'] == selected_sample_id]
+        st.write("#### Sigma DataFrame")
+        st.dataframe(df_sigma_filtered)
+
+    if 'ZT' in dataframes and not dataframes['ZT'].empty:
+        df_ZT_filtered = dataframes['ZT'][dataframes['ZT']['sample_id'] == selected_sample_id]
+        st.write("#### ZT DataFrame")
+        st.dataframe(df_ZT_filtered)
+
+    if 'alpha' in dataframes and not dataframes['alpha'].empty:
+        df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
+        st.write("#### Alpha DataFrame")
+        st.dataframe(df_alpha_filtered)
+
+    if 'kappa' in dataframes and not dataframes['kappa'].empty:
+        df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
+        st.write("#### Kappa DataFrame")
+        st.dataframe(df_kappa_filtered)
+
+    # 그래프 출력
     st.write("### Graphs for Selected Sample ID")
     create_and_plot_graphs_filtered(dataframes, selected_sample_id)
 
