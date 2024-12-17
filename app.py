@@ -100,33 +100,33 @@ def main():
     # 사용자 선택: sample_id
     selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
 
+    # 데이터프레임 출력
+    st.write(f"### Selected Sample ID: {selected_sample_id}")
+
     # 그래프 출력
     st.write("### Graphs for Selected Sample ID")
     create_and_plot_graphs_filtered(dataframes, selected_sample_id)
 
-    # 데이터프레임 출력
-    st.write(f"### Selected Sample ID: {selected_sample_id}")
-
     # 정확한 데이터프레임 출력
     if 'sigma' in dataframes and not dataframes['sigma'].empty:
         df_sigma_filtered = dataframes['sigma'][dataframes['sigma']['sample_id'] == selected_sample_id]
-        st.write("#### Sigma DataFrame")
+        st.write("#### Electrical conductivity DataFrame")
         st.dataframe(df_sigma_filtered)
+
+    if 'alpha' in dataframes and not dataframes['alpha'].empty:
+        df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
+        st.write("#### Seebeck coefficient DataFrame")
+        st.dataframe(df_alpha_filtered)
+
+    if 'kappa' in dataframes and not dataframes['kappa'].empty:
+        df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
+        st.write("#### Thermal conductivity DataFrame")
+        st.dataframe(df_kappa_filtered)
 
     if 'ZT' in dataframes and not dataframes['ZT'].empty:
         df_ZT_filtered = dataframes['ZT'][dataframes['ZT']['sample_id'] == selected_sample_id]
         st.write("#### ZT DataFrame")
         st.dataframe(df_ZT_filtered)
-
-    if 'alpha' in dataframes and not dataframes['alpha'].empty:
-        df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
-        st.write("#### Alpha DataFrame")
-        st.dataframe(df_alpha_filtered)
-
-    if 'kappa' in dataframes and not dataframes['kappa'].empty:
-        df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
-        st.write("#### Kappa DataFrame")
-        st.dataframe(df_kappa_filtered)
 
 
 if __name__ == "__main__":
