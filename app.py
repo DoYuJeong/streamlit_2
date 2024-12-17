@@ -364,9 +364,9 @@ def main():
         doi_file = st.sidebar.file_uploader("Upload DOI Data (CSV)", type="csv")
 
         if data_file and doi_file:
-        # 데이터 로드
-        thermoelectric_df = load_and_process_data(data_file)
-        doi_df = load_doi_data(doi_file)
+            # 데이터 로드
+            thermoelectric_df = load_and_process_data(data_file)
+            doi_df = load_doi_data(doi_file)
 
         if thermoelectric_df is not None and doi_df is not None:
             # Thermoelectric 데이터와 DOI 데이터 병합
