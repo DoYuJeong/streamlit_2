@@ -100,6 +100,10 @@ def main():
     # 사용자 선택: sample_id
     selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
 
+    # 그래프 출력
+    st.write("### Graphs for Selected Sample ID")
+    create_and_plot_graphs_filtered(dataframes, selected_sample_id)
+
     # 데이터프레임 출력
     st.write(f"### Selected Sample ID: {selected_sample_id}")
 
@@ -124,9 +128,6 @@ def main():
         st.write("#### Kappa DataFrame")
         st.dataframe(df_kappa_filtered)
 
-    # 그래프 출력
-    st.write("### Graphs for Selected Sample ID")
-    create_and_plot_graphs_filtered(dataframes, selected_sample_id)
 
 if __name__ == "__main__":
     main()
