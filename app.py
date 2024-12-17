@@ -12,7 +12,7 @@ def get_common_sample_ids(dataframes):
     sample_id_sets = [set(df['sample_id']) for df in dataframes.values() if df is not None]
     return set.intersection(*sample_id_sets) if sample_id_sets else set()
 
-# 기본 데이터: 그래프 생성 함수
+# 기본 데이터 그래프 생성 함수
 def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
     ax1, ax2, ax3, ax4 = axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1]
@@ -21,64 +21,95 @@ def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
     df_sigma = dataframes.get('sigma')
     if df_sigma is not None and not df_sigma.empty:
         df_filtered_sigma = df_sigma[df_sigma['sample_id'] == selected_sample_id]
-        ax1.plot(df_filtered_sigma['temperature'], df_filtered_sigma['tepvalue'], marker='o', color='m')
-        ax1.set_title('Sigma')
-        ax1.set_xlabel('Temperature (K)')
-        ax1.set_ylabel(r'$\sigma$ $[S/cm]$')
+        ax1.plot(df_filtered_sigma['temperature'], df_filtered_sigma['tepvalue'], marker='o', linestyle='-', color='m')
+        ax1.set_title(r'$\sigma$: Electrical Conductivity', fontsize=10)
+        ax1.set_xlabel('Temperature (K)', fontsize=9)
+        ax1.set_ylabel(r'$\sigma$ $[S/cm]$', fontsize=9)
+        ax1.grid(True)
 
     # Alpha 그래프
     df_alpha = dataframes.get('alpha')
     if df_alpha is not None and not df_alpha.empty:
         df_filtered_alpha = df_alpha[df_alpha['sample_id'] == selected_sample_id]
-        ax2.plot(df_filtered_alpha['temperature'], df_filtered_alpha['tepvalue'] * 1e6, marker='o', color='g')
-        ax2.set_title('Alpha')
-        ax2.set_xlabel('Temperature (K)')
-        ax2.set_ylabel(r'$\alpha$ $[\mu V/K]$')
+        ax2.plot(df_filtered_alpha['temperature'], df_filtered_alpha['tepvalue'] * 1e6, marker='o', linestyle='-', color='g')
+        ax2.set_title(r'$\alpha$: Seebeck Coefficient', fontsize=10)
+        ax2.set_xlabel('Temperature (K)', fontsize=9)
+        ax2.set_ylabel(r'$\alpha$ $[\mu V/K]$', fontsize=9)
+        ax2.grid(True)
+
+    # kappa 그래프
+    df_kappa = dataframes.get('kappa')
+    if df_kappa is not None and not df_kappa.empty:
+        df_filtered_kappa = df_kappa[df_kappa['sample_id'] == selected_sample_id]
+        ax3.plot(df_filtered_kappa['temperature'], df_filtered_kappa['tepvalue'], marker='o', linestyle='-', color='r')
+        ax3.set_title(r'$k$: Thermal Conductivity', fontsize=10)
+        ax3.set_xlabel('Temperature (K)', fontsize=9)
+        ax3.set_ylabel(r'$k$ $[W/(m·K)]$', fontsize=9)
+        ax3.grid(True)
 
     # ZT 그래프
     df_ZT = dataframes.get('ZT')
     if df_ZT is not None and not df_ZT.empty:
         df_filtered_ZT = df_ZT[df_ZT['sample_id'] == selected_sample_id]
-        ax4.plot(df_filtered_ZT['temperature'], df_filtered_ZT['tepvalue'], marker='o', color='b')
-        ax4.set_title('ZT')
-        ax4.set_xlabel('Temperature (K)')
-        ax4.set_ylabel(r'$ZT$')
+        ax4.plot(df_filtered_ZT['temperature'], df_filtered_ZT['tepvalue'], marker='o', linestyle='-', color='b')
+        ax4.set_title(r'$ZT$: Figure of Merit', fontsize=10)
+        ax4.set_xlabel('Temperature (K)', fontsize=9)
+        ax4.set_ylabel(r'$ZT$', fontsize=9)
+        ax4.grid(True)
 
     plt.tight_layout()
     st.pyplot(fig)
 
-# 파일 업로드: 그래프 생성 함수
+# 업로드 데이터 그래프 생성 함수
 def create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id):
+    """
+    업로드된 데이터에서 선택된 sample_id를 기준으로 4가지 열전 물성 그래프를 생성
+    """
+
+    # 온도 처리 함수
     def process_temperature(row):
+        """
+        prop_x 값이 'Inverse temperature'인 경우 1/T로 변환
+        """
         return [1 / t if t != 0 else np.nan for t in row['x']] if row['prop_x'] == 'Inverse temperature' else row['x']
     
+    # 데이터프레임 생성 함수
     def create_property_df(filtered_df, column_name, transform_func=None):
+        """
+        물성 데이터프레임 생성
+        """
         if filtered_df.empty:
             return pd.DataFrame(columns=['sample_id', 'temperature', column_name])
         
-        lens = filtered_df['y'].map(len)
-        sample_ids = filtered_df['sample_id'].repeat(lens)
-        temperatures = np.concatenate(filtered_df.apply(process_temperature, axis=1).values)
+        lens = filtered_df['y'].map(len)  # y 값의 길이 추출
+        sample_ids = filtered_df['sample_id'].repeat(lens).values  # 반복된 sample_id
+        temperatures = np.concatenate(filtered_df.apply(process_temperature, axis=1).values)  # 온도 데이터
         values = np.concatenate(filtered_df['y'].map(transform_func).values if transform_func else filtered_df['y'].values)
-        
-        df = pd.DataFrame({
+
+        return pd.DataFrame({
             'sample_id': sample_ids,
             'temperature': temperatures,
             column_name: values
-        })
-        return df.sort_values(by='temperature').reset_index(drop=True)
-    
-    # 데이터프레임 생성
-    dataframes = {
-        key: create_property_df(df[(df['prop_y'].isin(properties)) & (df['sample_id'] == sample_id)], key, func)
-        for key, (properties, func) in property_mappings.items()
+        }).sort_values(by='temperature').reset_index(drop=True)
+
+    # 열전 물성 매핑
+    property_mappings = {
+        'sigma': (['Electrical conductivity', 'Electrical resistivity'], lambda y: [1 / v if v != 0 else np.nan for v in y]),
+        'alpha': (['Seebeck coefficient', 'thermopower'], None),
+        'k': (['Thermal conductivity', 'total thermal conductivity'], None),
+        'ZT': (['ZT'], None)
     }
-    
-    # 개별 그래프 그리기
-    figsize = (10, 8)
-    fig, axs = plt.subplots(2, 2, figsize=figsize)
+
+    # 데이터프레임 생성
+    dataframes = {}
+    for key, (properties, transform_func) in property_mappings.items():
+        filtered_df = uploaded_df[(uploaded_df['prop_y'].isin(properties)) & (uploaded_df['sample_id'] == selected_sample_id)]
+        dataframes[key] = create_property_df(filtered_df, key, transform_func)
+
+    # 그래프 생성
+    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
     ax1, ax2, ax3, ax4 = axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1]
-    
+
     # Sigma 그래프
     df_sigma = dataframes.get('sigma')
     if df_sigma is not None and not df_sigma.empty:
@@ -87,8 +118,8 @@ def create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id):
         ax1.set_xlabel('Temperature (K)', fontsize=9)
         ax1.set_ylabel(r'$\sigma$ $[S/cm]$', fontsize=9)
         ax1.grid(True)
-    
-    # Alpha 그래프 (Y축 데이터에 1e6 곱하기)
+
+    # Alpha 그래프
     df_alpha = dataframes.get('alpha')
     if df_alpha is not None and not df_alpha.empty:
         ax2.plot(df_alpha['temperature'], df_alpha['alpha'] * 1e6, marker='o', linestyle='-', color='g')
@@ -96,8 +127,8 @@ def create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id):
         ax2.set_xlabel('Temperature (K)', fontsize=9)
         ax2.set_ylabel(r'$\alpha$ $[\mu V/K]$', fontsize=9)
         ax2.grid(True)
-    
-    # k 그래프
+
+    # kappa 그래프
     df_k = dataframes.get('k')
     if df_k is not None and not df_k.empty:
         ax3.plot(df_k['temperature'], df_k['k'], marker='o', linestyle='-', color='r')
@@ -105,7 +136,7 @@ def create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id):
         ax3.set_xlabel('Temperature (K)', fontsize=9)
         ax3.set_ylabel(r'$k$ $[W/(m·K)]$', fontsize=9)
         ax3.grid(True)
-    
+
     # ZT 그래프
     df_ZT = dataframes.get('ZT')
     if df_ZT is not None and not df_ZT.empty:
@@ -114,11 +145,12 @@ def create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id):
         ax4.set_xlabel('Temperature (K)', fontsize=9)
         ax4.set_ylabel(r'$ZT$', fontsize=9)
         ax4.grid(True)
-    
+
     plt.tight_layout()
     st.pyplot(fig)
-    
+
     return dataframes
+
 
 # 데이터 로드 및 처리 함수
 def load_and_process_data(uploaded_file):
@@ -201,13 +233,18 @@ def main():
     elif option == "파일 업로드":
         # 파일 업로드
         uploaded_file = st.sidebar.file_uploader("Thermoelectric Data File", type="csv")
+        doi_file = st.sidebar.file_uploader("DOI Data File", type="csv")
+
         if uploaded_file:
             uploaded_df = load_and_process_data(uploaded_file)
+            doi_df = load_csv(doi_file, usecols=['SID', 'DOI', 'URL']) if doi_file else None
+
             if uploaded_df is not None:
                 sample_ids = uploaded_df['sample_id'].unique()
                 selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sample_ids)
-                create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id)
+                create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id, doi_df)
 
+    
     # 공통 sample_id 추출 및 표시
     if dataframes:
         common_sample_ids = get_common_sample_ids(dataframes)
