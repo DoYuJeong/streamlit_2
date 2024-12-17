@@ -12,92 +12,11 @@ def get_common_sample_ids(dataframes):
     sample_id_sets = [set(df['sample_id'].unique()) for df in dataframes.values() if df is not None]
     return set.intersection(*sample_id_sets) if sample_id_sets else set()
 
-# 기본 데이터 그래프 생성 함수
-def create_and_plot_graphs_filtered(dataframes, selected_sample_id):
-    """
-    기본 데이터셋에서 선택된 sample_id를 기준으로 그래프를 생성
-    """
-    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-    ax1, ax2, ax3, ax4 = axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1]
-
-    titles = ["Electrical Conductivity", "Seebeck Coefficient", "Thermal Conductivity", "ZT"]
-    units = [r"$\sigma$ [S/cm]", r"$\alpha$ [$\mu V/K$]", r"$k$ [W/(m·K)]", r"ZT"]
-    keys = ["sigma", "alpha", "kappa", "ZT"]
-    axes = [ax1, ax2, ax3, ax4]
-
-    for ax, key, title, unit in zip(axes, keys, titles, units):
-        df = dataframes.get(key)
-        if df is not None and not df.empty:
-            filtered_df = df[df['sample_id'] == selected_sample_id]
-            if not filtered_df.empty:
-                ax.plot(filtered_df['temperature'], filtered_df['tepvalue'], marker='o', linestyle='-')
-                ax.set_title(title)
-                ax.set_xlabel("Temperature (K)")
-                ax.set_ylabel(unit)
-                ax.grid(True)
-
-    plt.tight_layout()
-    st.pyplot(fig)
-
-# 업로드 데이터 그래프 생성 함수
-def create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id):
-    """
-    업로드된 데이터셋에서 선택된 sample_id를 기준으로 그래프를 생성
-    """
-    def process_temperature(row):
-        return [1 / t if t != 0 else np.nan for t in row['x']] if row['prop_x'] == 'Inverse temperature' else row['x']
-    
-    def create_property_df(filtered_df, column_name, transform_func=None):
-        if filtered_df.empty:
-            return pd.DataFrame(columns=['sample_id', 'temperature', column_name])
-        
-        lens = filtered_df['y'].map(len)
-        sample_ids = filtered_df['sample_id'].repeat(lens).values
-        temperatures = np.concatenate(filtered_df.apply(process_temperature, axis=1).values)
-        values = np.concatenate(filtered_df['y'].map(transform_func).values if transform_func else filtered_df['y'].values)
-
-        return pd.DataFrame({
-            'sample_id': sample_ids,
-            'temperature': temperatures,
-            column_name: values
-        }).sort_values(by='temperature').reset_index(drop=True)
-
-    # 물성 매핑
-    property_mappings = {
-        'sigma': (['Electrical conductivity', 'Electrical resistivity'], lambda y: [1 / v if v != 0 else np.nan for v in y]),
-        'alpha': (['Seebeck coefficient', 'thermopower'], None),
-        'kappa': (['Thermal conductivity', 'total thermal conductivity'], None),
-        'ZT': (['ZT'], None)
-    }
-
-    # 데이터프레임 생성
-    dataframes = {}
-    for key, (properties, func) in property_mappings.items():
-        filtered_df = uploaded_df[(uploaded_df['prop_y'].isin(properties)) & (uploaded_df['sample_id'] == selected_sample_id)]
-        dataframes[key] = create_property_df(filtered_df, key, func)
-
-    # 그래프 생성
-    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-    ax1, ax2, ax3, ax4 = axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1]
-    keys = ["sigma", "alpha", "kappa", "ZT"]
-    titles = ["Electrical Conductivity", "Seebeck Coefficient", "Thermal Conductivity", "ZT"]
-    units = [r"$\sigma$ [S/cm]", r"$\alpha$ [$\mu V/K$]", r"$k$ [W/(m·K)]", r"ZT"]
-    axes = [ax1, ax2, ax3, ax4]
-
-    for ax, key, title, unit in zip(axes, keys, titles, units):
-        df = dataframes.get(key)
-        if df is not None and not df.empty:
-            ax.plot(df['temperature'], df[key], marker='o', linestyle='-')
-            ax.set_title(title)
-            ax.set_xlabel("Temperature (K)")
-            ax.set_ylabel(unit)
-            ax.grid(True)
-
-    plt.tight_layout()
-    st.pyplot(fig)
-
-# 업로드된 파일 처리 함수
+# 업로드된 데이터 처리 함수
 def load_and_process_data(uploaded_file):
+    """
+    업로드된 CSV 파일을 읽고 x, y 값을 리스트로 변환
+    """
     try:
         df = pd.read_csv(uploaded_file, usecols=['prop_x', 'prop_y', 'x', 'y', 'sample_id'])
         df['x'] = df['x'].apply(ast.literal_eval)
@@ -107,12 +26,59 @@ def load_and_process_data(uploaded_file):
         st.error(f"Error processing uploaded file: {e}")
         return None
 
+# 그래프 생성 함수
+def create_and_plot_graphs(dataframes, selected_sample_id, is_uploaded=False):
+    """
+    데이터를 기반으로 그래프 생성 (기본 데이터와 업로드된 데이터 처리 방식 통합)
+    """
+    # 업로드 데이터 처리용 내부 함수
+    def process_temperature(row):
+        return [1 / t if t != 0 else np.nan for t in row['x']] if row['prop_x'] == 'Inverse temperature' else row['x']
+
+    # 데이터 정리 함수
+    def prepare_data(df, column_name, transform_func=None):
+        if is_uploaded:
+            lens = df['y'].map(len)
+            sample_ids = df['sample_id'].repeat(lens)
+            temperatures = np.concatenate(df.apply(process_temperature, axis=1).values)
+            values = np.concatenate(df['y'].map(transform_func).values if transform_func else df['y'].values)
+        else:
+            sample_ids = df['sample_id']
+            temperatures = df['temperature']
+            values = df['tepvalue']
+        
+        return pd.DataFrame({'sample_id': sample_ids, 'temperature': temperatures, column_name: values})
+
+    # 그래프 생성
+    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+    keys = ["sigma", "alpha", "kappa", "ZT"]
+    titles = ["Electrical Conductivity", "Seebeck Coefficient", "Thermal Conductivity", "ZT"]
+    units = [r"$\sigma$ [S/cm]", r"$\alpha$ [$\mu V/K$]", r"$k$ [W/(m·K)]", r"ZT"]
+    colors = ['m', 'g', 'r', 'b']
+    
+    for ax, key, title, unit, color in zip(axs.flatten(), keys, titles, units, colors):
+        df = dataframes.get(key)
+        if df is not None and not df.empty:
+            if is_uploaded:
+                filtered_df = df[(df['sample_id'] == selected_sample_id) & (df['prop_y'].isin([title]))]
+                data = prepare_data(filtered_df, key)
+            else:
+                data = df[df['sample_id'] == selected_sample_id]
+            if not data.empty:
+                ax.plot(data['temperature'], data[key], marker='o', linestyle='-', color=color)
+                ax.set_title(title)
+                ax.set_xlabel("Temperature (K)")
+                ax.set_ylabel(unit)
+                ax.grid(True)
+    plt.tight_layout()
+    st.pyplot(fig)
+
 
 # Streamlit 메인 함수
 def main():
     st.title("Thermoelectric Property Dashboard")
     option = st.sidebar.radio("데이터 처리 옵션", ["기본 데이터 사용", "파일 업로드"])
-
+    
     # 간단한 CV 추가
     st.markdown("""
     **Created by: Doyujeong**  
@@ -155,21 +121,13 @@ def main():
     option = st.sidebar.radio("데이터 처리 옵션", ["기본 데이터 사용", "파일 업로드"])
 
     if option == "기본 데이터 사용":
-        # 기본 데이터 로드
-        file_paths = {
-            'sigma': 'df_combined_sigma.csv',
-            'alpha': 'df_alpha0.csv',
-            'kappa': 'df_kappa0.csv',
-            'ZT': 'df_combined_ZT.csv'
-        }
+        file_paths = {'sigma': 'df_combined_sigma.csv', 'alpha': 'df_alpha0.csv', 'kappa': 'df_kappa0.csv', 'ZT': 'df_combined_ZT.csv'}
         dataframes = {key: pd.read_csv(path) for key, path in file_paths.items()}
         common_sample_ids = get_common_sample_ids(dataframes)
 
         if common_sample_ids:
-            st.write("### 공통된 Sample IDs")
-            st.write(sorted(common_sample_ids))
             selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
-            create_and_plot_graphs_filtered(dataframes, selected_sample_id)
+            create_and_plot_graphs(dataframes, selected_sample_id)
         else:
             st.error("No common sample IDs with all properties found.")
 
@@ -179,10 +137,8 @@ def main():
             uploaded_df = load_and_process_data(uploaded_file)
             if uploaded_df is not None:
                 sample_ids = uploaded_df['sample_id'].unique()
-                st.write("### 공통된 Sample IDs")
-                st.write(sorted(sample_ids))
                 selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(sample_ids))
-                create_and_plot_uploaded_graphs(uploaded_df, selected_sample_id)
+                create_and_plot_graphs({'sigma': uploaded_df}, selected_sample_id, is_uploaded=True)
 
 if __name__ == "__main__":
     main()
