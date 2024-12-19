@@ -258,53 +258,54 @@ def main():
     **GitHub**: [DoYuJeong](https://github.com/DoYuJeong)
     """)
 
+    # 탭 생성
+    tabs = st.tabs(["📊 Dashboard Overview", "📈 Graphs", "📂 Data Frames"])
+
+    # 탭 1: Dashboard Overview
+    with tabs[0]:
     st.markdown("""
-    ### 📊 **이 대시보드는 무엇인가요?**  
-    이 대시보드는 **열전재료**의 주요 물성을 시각화하는 도구입니다.  
-    아래의 물성을 온도에 따라 그래프로 확인할 수 있습니다:  
-    - **Sigma**: 전기전도도 (Electrical Conductivity)  
-    - **Alpha**: 제벡계수 (Seebeck Coefficient)  
-    - **Kappa**: 열전도도 (Thermal Conductivity)  
-    - **ZT**: 열전 성능 지수 (Figure of Merit)  
-
-    ---
-
-    ### 📝 **사용 방법**  
-    
-    #### **1. 데이터 처리 방식 선택**  
-    왼쪽 사이드바에서 원하는 **데이터 처리 방식**을 선택하세요:  
-    - **기본 데이터 사용**: 이미 준비된 데이터를 사용하여 열전 물성을 확인합니다.  
-    - **파일 업로드**: 사용자가 보유한 CSV 데이터를 업로드하여 열전 물성을 확인합니다.  
-
-    ---
-
-    #### **2. 샘플 ID 선택하기**  
-    - 선택 가능한 **샘플 ID**는 특정 재료의 데이터 세트를 의미합니다.  
-    - **기본 데이터 사용**: 미리 준비된 데이터에 포함된 샘플 ID가 자동으로 제공됩니다.  
-    - **파일 업로드**: 업로드한 데이터에서 공통 열전 물성이 모두 존재하는 샘플 ID를 자동으로 탐색합니다.  
-
-    ---
-
-    #### **3. 그래프 확인하기**  
-    - 선택한 샘플 ID에 대한 **온도별 열전 물성 그래프**를 확인할 수 있습니다.  
-    - 아래의 **4가지 열전 물성**을 시각화합니다:  
+        ### 📊 **이 대시보드는 무엇인가요?**  
+        이 대시보드는 **열전재료**의 주요 물성을 시각화하는 도구입니다.  
+        아래의 물성을 온도에 따라 그래프로 확인할 수 있습니다:  
         - **Sigma**: 전기전도도 (Electrical Conductivity)  
         - **Alpha**: 제벡계수 (Seebeck Coefficient)  
         - **Kappa**: 열전도도 (Thermal Conductivity)  
         - **ZT**: 열전 성능 지수 (Figure of Merit)  
-
-    ---
-
-    #### **4. 데이터 테이블 보기**  
-    - 그래프에 사용된 **전처리된 데이터**를 테이블 형식으로 제공합니다.  
-    - 각 열전 물성별로 정리된 데이터 (`Sigma`, `Alpha`, `Kappa`, `ZT`)를 확인할 수 있습니다. 
+    
+        ---
+    
+        ### 📝 **사용 방법**  
         
-    ---
-
-    #### **5. 연구 논문 정보 확인**  
-    - 선택한 샘플 ID와 관련된 **DOI**(연구 논문 정보) 및 **URL** 링크를 확인할 수 있습니다.  
-    - 논문 링크를 통해 해당 데이터를 연구에 활용한 정보를 찾아볼 수 있습니다.  
-    """)
+        #### **1. 데이터 처리 방식 선택**  
+        왼쪽 사이드바에서 원하는 **데이터 처리 방식**을 선택하세요:  
+        - **기본 데이터 사용**: 이미 준비된 데이터를 사용하여 열전 물성을 확인합니다.  
+        - **파일 업로드**: 사용자가 보유한 CSV 데이터를 업로드하여 열전 물성을 확인합니다.  
+    
+        ---
+    
+        #### **2. 샘플 ID 선택하기**  
+        - 선택 가능한 **샘플 ID**는 특정 재료의 데이터 세트를 의미합니다.  
+        - **기본 데이터 사용**: 미리 준비된 데이터에 포함된 샘플 ID가 자동으로 제공됩니다.  
+        - **파일 업로드**: 업로드한 데이터에서 공통 열전 물성이 모두 존재하는 샘플 ID를 자동으로 탐색합니다.  
+    
+        ---
+    
+        #### **3. 그래프 확인하기**  
+        - 선택한 샘플 ID에 대한 **온도별 열전 물성 그래프**를 확인할 수 있습니다.  
+        - **4가지 열전 물성**을 시각화합니다:  
+    
+        ---
+    
+        #### **4. 데이터 테이블 보기**  
+        - 그래프에 사용된 **전처리된 데이터**를 테이블 형식으로 제공합니다.  
+        - 각 열전 물성별로 정리된 데이터 (`Sigma`, `Alpha`, `Kappa`, `ZT`)를 확인할 수 있습니다. 
+            
+        ---
+    
+        #### **5. 연구 논문 정보 확인**  
+        - 선택한 샘플 ID와 관련된 **DOI**(연구 논문 정보) 및 **URL** 링크를 확인할 수 있습니다.  
+        - 논문 링크를 통해 해당 데이터를 연구에 활용한 정보를 찾아볼 수 있습니다.  
+        """)
 
     if option == "기본 데이터 사용":
         # 데이터 로드
@@ -341,45 +342,47 @@ def main():
     
         # 사용자 선택: sample_id
         selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
-    
-        # 데이터프레임 출력
-        st.write(f"### Selected Sample ID: {selected_sample_id}")
-    
-        # 선택된 sample_id에 대한 DOI 정보
-        doi_info = doi_df[doi_df['SID'] == selected_sample_id]
-        if not doi_info.empty:
-            doi = doi_info['DOI'].iloc[0]
-            url = doi_info['URL'].iloc[0]
-            st.write(f"**DOI**: {doi}")
-            st.markdown(f"**URL**: [{url}]({url})")
-        else:
-            st.write("**DOI**: Not Available")
-            st.write("**URL**: Not Available")
-    
-        # 그래프 출력
-        st.write("### Graphs for Selected Sample ID")
-        create_and_plot_graphs_filtered(dataframes, selected_sample_id)
-    
-        # 정확한 데이터프레임 출력
-        if 'sigma' in dataframes and not dataframes['sigma'].empty:
-            df_sigma_filtered = dataframes['sigma'][dataframes['sigma']['sample_id'] == selected_sample_id]
-            st.write("#### Electrical conductivity DataFrame")
-            st.dataframe(df_sigma_filtered)
-    
-        if 'alpha' in dataframes and not dataframes['alpha'].empty:
-            df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
-            st.write("#### Seebeck coefficient DataFrame")
-            st.dataframe(df_alpha_filtered)
-    
-        if 'kappa' in dataframes and not dataframes['kappa'].empty:
-            df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
-            st.write("#### Thermal conductivity DataFrame")
-            st.dataframe(df_kappa_filtered)
-    
-        if 'ZT' in dataframes and not dataframes['ZT'].empty:
-            df_ZT_filtered = dataframes['ZT'][dataframes['ZT']['sample_id'] == selected_sample_id]
-            st.write("#### ZT DataFrame")
-            st.dataframe(df_ZT_filtered)
+
+        # 탭 2: Graphs
+        with tabs[1]:
+            st.write(f"### Selected Sample ID: {selected_sample_id}")
+        
+            # 선택된 sample_id에 대한 DOI 정보
+            doi_info = doi_df[doi_df['SID'] == selected_sample_id]
+            if not doi_info.empty:
+                doi = doi_info['DOI'].iloc[0]
+                url = doi_info['URL'].iloc[0]
+                st.write(f"**DOI**: {doi}")
+                st.markdown(f"**URL**: [{url}]({url})")
+            else:
+                st.write("**DOI**: Not Available")
+                st.write("**URL**: Not Available")
+        
+            # 그래프 출력
+            st.write("### Graphs for Selected Sample ID")
+            create_and_plot_graphs_filtered(dataframes, selected_sample_id)
+            
+        with tabs[1]:
+            # 정확한 데이터프레임 출력
+            if 'sigma' in dataframes and not dataframes['sigma'].empty:
+                df_sigma_filtered = dataframes['sigma'][dataframes['sigma']['sample_id'] == selected_sample_id]
+                st.write("#### Electrical conductivity DataFrame")
+                st.dataframe(df_sigma_filtered)
+        
+            if 'alpha' in dataframes and not dataframes['alpha'].empty:
+                df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
+                st.write("#### Seebeck coefficient DataFrame")
+                st.dataframe(df_alpha_filtered)
+        
+            if 'kappa' in dataframes and not dataframes['kappa'].empty:
+                df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
+                st.write("#### Thermal conductivity DataFrame")
+                st.dataframe(df_kappa_filtered)
+        
+            if 'ZT' in dataframes and not dataframes['ZT'].empty:
+                df_ZT_filtered = dataframes['ZT'][dataframes['ZT']['sample_id'] == selected_sample_id]
+                st.write("#### ZT DataFrame")
+                st.dataframe(df_ZT_filtered)
 
     elif option == "파일 업로드":
         # 사이드바: 파일 업로드
