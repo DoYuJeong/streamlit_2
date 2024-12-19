@@ -259,7 +259,7 @@ def main():
     """)
 
     # 탭 생성
-    tabs = st.tabs(["📊 Dashboard Overview", "📈 Graphs", "📂 Data Frames"])
+    tabs = st.tabs(["📊 Dashboard Overview", "📂 Data Frames", "📈 Graphs"])
 
     # 탭 1: Dashboard Overview
     with tabs[0]:
@@ -343,11 +343,11 @@ def main():
         # 사용자 선택: sample_id
         selected_sample_id = st.sidebar.selectbox("Select Sample ID:", sorted(common_sample_ids))
 
-        # 탭 2: Graphs
+        # 탭 2: Data Frames
         with tabs[1]:
             st.write(f"### Selected Sample ID: {selected_sample_id}")
-        
-            # 선택된 sample_id에 대한 DOI 정보
+
+            # DOI 정보 출력
             doi_info = doi_df[doi_df['SID'] == selected_sample_id]
             if not doi_info.empty:
                 doi = doi_info['DOI'].iloc[0]
@@ -357,32 +357,32 @@ def main():
             else:
                 st.write("**DOI**: Not Available")
                 st.write("**URL**: Not Available")
-        
-            # 그래프 출력
-            st.write("### Graphs for Selected Sample ID")
-            create_and_plot_graphs_filtered(dataframes, selected_sample_id)
-            
-        with tabs[1]:
-            # 정확한 데이터프레임 출력
+
+            # 데이터프레임 출력
             if 'sigma' in dataframes and not dataframes['sigma'].empty:
                 df_sigma_filtered = dataframes['sigma'][dataframes['sigma']['sample_id'] == selected_sample_id]
                 st.write("#### Electrical conductivity DataFrame")
                 st.dataframe(df_sigma_filtered)
-        
+
             if 'alpha' in dataframes and not dataframes['alpha'].empty:
                 df_alpha_filtered = dataframes['alpha'][dataframes['alpha']['sample_id'] == selected_sample_id]
                 st.write("#### Seebeck coefficient DataFrame")
                 st.dataframe(df_alpha_filtered)
-        
+
             if 'kappa' in dataframes and not dataframes['kappa'].empty:
                 df_kappa_filtered = dataframes['kappa'][dataframes['kappa']['sample_id'] == selected_sample_id]
                 st.write("#### Thermal conductivity DataFrame")
                 st.dataframe(df_kappa_filtered)
-        
+
             if 'ZT' in dataframes and not dataframes['ZT'].empty:
                 df_ZT_filtered = dataframes['ZT'][dataframes['ZT']['sample_id'] == selected_sample_id]
                 st.write("#### ZT DataFrame")
                 st.dataframe(df_ZT_filtered)
+
+        # 탭 3: Graphs
+        with tabs[2]:
+            st.write("### Graphs for Selected Sample ID")
+            create_and_plot_graphs_filtered(dataframes, selected_sample_id)
 
     elif option == "파일 업로드":
         # 사이드바: 파일 업로드
